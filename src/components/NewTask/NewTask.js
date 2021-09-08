@@ -1,38 +1,22 @@
 import { useState } from 'react';
+import useHttp from '../hooks/use-http';
 
 import Section from '../UI/Section';
 import TaskForm from './TaskForm';
 
 const NewTask = (props) => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const {isLoading, error, sendRequest : addTask} = useHttp();
 
   const enterTaskHandler = async (taskText) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const response = await fetch(
-        'http://localhost:8085/tasks',
-        {
-          method: 'POST',
-          body: JSON.stringify({ text: taskText }),
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
 
-      if (!response.ok) {
-        throw new Error('Request failed!');
+    addTask({
+      url : 'http://localhost:8085/tasks',
+      method: 'POST',
+      body: { text: taskText },
+      headers: {
+        'Content-Type': 'application/json',
       }
-
-      const createdTask = { text: taskText };
-
-      props.onAddTask(createdTask);
-    } catch (err) {
-      setError(err.message || 'Something went wrong!');
-    }
-    setIsLoading(false);
+    }, props.onAddTask({ text: taskText }))
   };
 
   return (
